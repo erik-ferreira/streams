@@ -56,7 +56,7 @@ export async function userRoutes(app: FastifyInstance) {
 
     const extension = path.extname(data.filename)
 
-    if (extension !== ".mp4") {
+    if (![".mp4", ".png"].includes(extension)) {
       return reply
         .status(400)
         .send({ error: "Invalid file type, please upload a MP4." })
@@ -68,6 +68,14 @@ export async function userRoutes(app: FastifyInstance) {
     const uploadDestination = path.resolve(__dirname, "../tmp", fileUploadName)
 
     await pump(data.file, fs.createWriteStream(uploadDestination))
+
+    await prisma.video.create({
+      data: {
+        userId: "c8b03256-fb52-4acc-bb2c-e525dc7eb584",
+        url: uploadDestination,
+        title: fileBaseName,
+      },
+    })
 
     return reply.send({ message: "Upload de arquivo" })
   })
